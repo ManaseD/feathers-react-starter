@@ -1,0 +1,68 @@
+version: '2.1'
+
+services:
+  app:
+    build: ./app
+    volumes:
+      - ./app/.babelrc:/home/node/.babelrc
+      - ./app/src:/home/node/src
+      - ./app/start.js:/home/node/start.js
+      - ./app/webpack.config.js:/home/node/webpack.config.js
+      - ./app/static:/home/node/dist
+    environment:
+      - NODE_ENV=development
+      - LOG_FORMAT=dev
+      - SPA_BASE_URL=http://localhost:$APP_PORT
+      - API_BASE_URL=http://localhost:$API_PORT
+      - INTERNAL_API_BASE_URL=http://api:8000
+    ports:
+      - "$APP_PORT:8000"
+    entrypoint: node start.js
+
+  api:
+    build: ./api
+    volumes:
+      - ./api/config:/home/node/config
+      - ./api/src:/home/node/src
+      - ./api/scripts:/home/node/scripts
+      - ./api/static/uploads:/home/node/uploads
+    environment:
+      - API_BASE_URL=http://localhost:$API_PORT
+      - APP_BASE_URL=http://localhost:$APP_PORT
+      - DEBUG=feathers-react-starter:*
+      - LOG_FORMAT=dev
+      - NODE_ENV=development
+      - POSTGRES_DB=project-name
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=project-name
+    env_file:
+      - ./api/secrets/POSTGRES_PASSWORD
+    ports:
+    - "$API_PORT:8000"
+    - "9230:9229"
+    command: ./node_modules/.bin/nodemon --inspect=9229 src/index.js
+    depends_on:
+      postgres:
+        condition: service_started
+
+  postgres:
+    image: postgres:9.6
+    environment:
+      - POSTGRES_DB=project-name
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=project-name
+    env_file:
+      - ./api/secrets/POSTGRES_PASSWORD
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data: {}
+
+networks:
+  default:
+    driver_opts:
+      com.docker.network.driver.mtu: 1450
+    ipam:
+      config:
+      - subnet: 10.102.0.0/24

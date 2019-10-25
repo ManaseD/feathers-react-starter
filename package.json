@@ -1,0 +1,23 @@
+{
+  "name": "project-name",
+  "version": "0.4.0",
+  "private": true,
+  "license": "MIT",
+  "author": "Hospital for Sick Children, Toronto, Canada",
+  "description": "Sample project with feathers and react",
+  "homepage": "https://ccm.sickkids.ca/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ManaseD/feathers-react-starter"
+  },
+  "bugs": {},
+  "scripts": {
+    "db:reset": "docker-compose -f docker-compose.yml run --rm api node scripts db/reset",
+    "psql": "docker-compose -f docker-compose.yml exec postgres psql -U project-name project-name"
+  },
+  "dependencies": {
+    "node-base64-image": "^1.0.6",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.4"
+  }
+}
