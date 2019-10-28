@@ -66,7 +66,7 @@ app:
 Then setup the nginx config (`/etc/nginx/sites-available/default`) to point incoming server requests to the backend and front-end respectively, example below:
 ```
 server {
-        listen 80;                                                                                                           
+        listen 80;
         server_name <your-domain-name>;
         location / {
           return 301 https://$server_name$request_uri/;
