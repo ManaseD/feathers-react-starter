@@ -1,4 +1,4 @@
-import feathers from '@feathersjs/feathers'
+import feathers from '@feathersjs/client'
 import rest from '@feathersjs/rest-client'
 import fetch from 'isomorphic-fetch'
 
@@ -8,5 +8,6 @@ const app = feathers()
 const api = rest(BASE_URL).fetch(fetch)
 
 app.configure(api)
+app.configure(feathers.authentication())
 
 export { app as default }
