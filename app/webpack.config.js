@@ -1,27 +1,25 @@
 'use strict'
 
 const path = require('path')
-const fs = require('fs')
-
 const webpack = require('webpack')
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
 const nodeExternals = require('webpack-node-externals')
-const CopyWebpackPlugin = require('copy-webpack-plugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const envalid = require('envalid')
-
 const { makeValidator } = envalid
+
 const nonEmptyString = makeValidator((input) => {
-  if (typeof input === 'string' && input !== '') return input
+  if (typeof input === 'string' && input !== '') {
+    return input
+  }
+
   throw new Error(`Not a non-empty string: '${input}'`)
 })
 
-const stringifyKeys = obj => (sum, key) =>
-  Object.assign({}, sum, { [key]: JSON.stringify(obj[key]) })
+const stringifyKeys = obj => (sum, key) => Object.assign({}, sum, { [key]: JSON.stringify(obj[key]) })
 
-const isNodeModule = module =>
-  module.context && module.context.indexOf('node_modules') !== -1
+const isNodeModule = module => module.context && module.context.indexOf('node_modules') !== -1
 
 const PUBLIC_PATH = '/'
 
@@ -30,40 +28,47 @@ module.exports = function (opts) {
   const IS_BROWSER = platform === 'browser'
   const IS_SERVER = platform === 'node'
 
-  // === ENVIRONMENT VARIABLES ===
+  /*
+    ENVIRONMENT VARIABLES
+  */
 
-  const { str, bool } = envalid
-  const env = envalid.cleanEnv(process.env, Object.assign({
-    NODE_ENV: str({
-      choices: ['production', 'development'],
-      default: 'development',
-    }),
-    API_BASE_URL: str({ default: 'not provided' }),
-    SPA_BASE_URL: nonEmptyString(),
-  }, IS_BROWSER ? {
-    STATIC_ROOT: str({ default: 'not provided' }),
-  } : {
-    INTERNAL_API_BASE_URL: str({ default: 'not provided' }),
-  }), {
-    strict: true
-  })
+  const { str } = envalid
+  const env = envalid.cleanEnv(
+    process.env,
+    Object.assign({
+        NODE_ENV: str({
+          choices: ['production', 'development'],
+          default: 'development',
+        }),
+        API_BASE_URL: str({ default: 'not provided' }),
+        SPA_BASE_URL: nonEmptyString(),
+      },
+        IS_BROWSER
+          ? { STATIC_ROOT: str({ default: 'not provided' })}
+          : { INTERNAL_API_BASE_URL: str({ default: 'not provided' }) }
+    ),
+    { strict: true  }
+  )
 
   console.log(`[webpack] Constructing configuration for platform ${platform}`)
   console.log(`NODE_ENV: ${process.env.NODE_ENV}`)
   console.log(`[webpack] API_BASE_URL=${env.API_BASE_URL}`)
+
   if (IS_BROWSER) {
     console.log(`[webpack] STATIC_ROOT=${env.STATIC_ROOT}`)
   } else {
     console.log(`[webpack] INTERNAL_API_BASE_URL=${env.INTERNAL_API_BASE_URL}`)
   }
 
-  // === PLUGINS ===
+  /*
+    PLUGINS
+  */
 
   const plugins = [
     new webpack.DefinePlugin({
       IS_BROWSER: JSON.stringify(IS_BROWSER),
       IS_SERVER: JSON.stringify(IS_SERVER),
-    }),
+    })
   ]
 
   if (IS_BROWSER) {
@@ -73,12 +78,10 @@ module.exports = function (opts) {
           'NODE_ENV',
           'API_BASE_URL',
           'SPA_BASE_URL',
-        ].reduce(stringifyKeys(env), {}),
+        ]
+          .reduce(stringifyKeys(env), {}),
       }),
-      new webpack.optimize.CommonsChunkPlugin({
-        name: 'vendor',
-        minChunks: isNodeModule,
-      }),
+      new webpack.optimize.CommonsChunkPlugin({ name: 'vendor', minChunks: isNodeModule }),
       new ExtractTextPlugin('styles.[hash].css'),
       new HtmlWebpackPlugin({
         favicon: './src/assets/favicon.ico',
@@ -91,32 +94,24 @@ module.exports = function (opts) {
 
   if (IS_BROWSER && env.isProduction) {
     plugins.push(
-      new webpack.LoaderOptionsPlugin({
-        minimize: true,
-        debug: false,
-      }),
-      new webpack.optimize.UglifyJsPlugin({
-        sourceMap: true,
-        comments: false,
-      })
+      new webpack.LoaderOptionsPlugin({ minimize: true, debug: false }),
+      new webpack.optimize.UglifyJsPlugin({ sourceMap: true, comments: false })
     )
   }
 
   if (IS_BROWSER && env.isProduction && wba) {
-    plugins.push(...[new BundleAnalyzerPlugin()])
+    plugins.push( ...[new BundleAnalyzerPlugin()] )
   }
 
   if (IS_SERVER) {
     plugins.push(
-      new webpack.BannerPlugin({
-        banner: 'require("source-map-support").install()',
-        raw: true,
-        entryOnly: false,
-      })
+      new webpack.BannerPlugin({ banner: 'require("source-map-support").install()', raw: true, entryOnly: false })
     )
   }
 
-  // === RULES ===
+  /*
+    RULES
+  */
 
   const jsxRule = {
     test: /\.jsx?$/,
@@ -129,15 +124,8 @@ module.exports = function (opts) {
       test: /\.css$/,
     },
     IS_BROWSER
-      ? {
-        use: ExtractTextPlugin.extract({
-          fallback: 'style-loader',
-          use: 'css-loader',
-        }),
-      }
-      : {
-        loader: 'css-loader/locals',
-      }
+      ? { use: ExtractTextPlugin.extract({ fallback: 'style-loader', use: 'css-loader' }) }
+      : { loader: 'css-loader/locals' }
   )
 
   const filesRule = {
@@ -151,7 +139,9 @@ module.exports = function (opts) {
     },
   }
 
-  // === CONFIG ===
+  /*
+    CONFIG
+  */
 
   const config = {
     entry: IS_BROWSER ? [ 'babel-polyfill', './src/client.js' ] : './src/server.js',
@@ -179,13 +169,7 @@ module.exports = function (opts) {
   }
 
   if (IS_SERVER) {
-    Object.assign(config, {
-      node: {
-        __dirname: false,
-        __filename: false,
-      },
-      externals: [nodeExternals()],
-    })
+    Object.assign(config, { node: { __dirname: false, __filename: false }, externals: [nodeExternals()] })
   }
 
   return config
