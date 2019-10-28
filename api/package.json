@@ -2,12 +2,11 @@
   "name": "feathers-react-starter-api",
   "description": "",
   "version": "0.0.0",
-  "homepage": "",
+  "license": "MIT",
   "main": "src",
   "keywords": [
     "feathers"
   ],
-  "author": "Hospital for Sick Children, Toronto, Canada",
   "contributors": [],
   "bugs": {},
   "directories": {

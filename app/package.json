@@ -1,11 +1,8 @@
 {
   "name": "Feathers-React-Starter-APP",
   "version": "0.4.0",
-  "private": true,
-  "license": "UNLICENSED",
-  "author": "Hospital for Sick Children, Toronto, Canada",
+  "license": "MIT",
   "description": "Sample project with feathers and react",
-  "homepage": "https://ccm.sickkids.ca/",
   "main": "index.js",
   "scripts": {
     "start": "node start.js",

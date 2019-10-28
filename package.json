@@ -1,11 +1,8 @@
 {
   "name": "project-name",
   "version": "0.4.0",
-  "private": true,
   "license": "MIT",
-  "author": "Hospital for Sick Children, Toronto, Canada",
   "description": "Sample project with feathers and react",
-  "homepage": "https://ccm.sickkids.ca/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ManaseD/feathers-react-starter"
