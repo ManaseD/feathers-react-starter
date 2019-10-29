@@ -4,7 +4,7 @@ Boilerplate code for a simple web app using [Docker](https://www.docker.com/), [
 
 ## Requirements
 
-Download and install the docker community edition.
+Download and install docker community edition.
 
 ## Getting started
 
